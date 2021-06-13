@@ -1,5 +1,5 @@
 DIR  := ${CURDIR}
-NAME := rust_wa_calc
+NAME := rust_wasm32_calc
 
 # Build WA Module from Rust with cargo.
 .PHONY: build-wa-debug-module
