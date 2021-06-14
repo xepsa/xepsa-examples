@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "WASI",
+        "cdylib",
         "fname",
         "wasm",
         "wasmer",
+        "wasmerio",
         "wasmtime",
         "wordcounter",
         "xepsa"
