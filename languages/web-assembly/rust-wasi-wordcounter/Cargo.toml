@@ -1,5 +1,5 @@
 [package]
-name = "rust-wa-wordcounter"
+name = "rust-wasi-wordcounter"
 version = "0.1.0"
 authors = ["Tim Langford <tim.langford@gmail.com>"]
 edition = "2018"
