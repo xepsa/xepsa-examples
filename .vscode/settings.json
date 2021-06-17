@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "WASI",
+        "addto",
+        "bindgen",
         "cdylib",
         "fname",
         "wasm",
