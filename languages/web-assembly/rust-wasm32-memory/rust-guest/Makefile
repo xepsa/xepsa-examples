@@ -5,5 +5,3 @@ build-debug:
 .PHONY: build-release
 build-release:
 	cargo build --release --target wasm32-unknown-unknown
-
-

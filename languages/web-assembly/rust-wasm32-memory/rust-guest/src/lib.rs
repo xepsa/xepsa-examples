@@ -28,20 +28,20 @@ pub extern "C" fn get_buffer_ptr() -> *const u8 {
  * beginning of the buffer.
  *
  * When the set_name function is called, the guest module replaces the name in the buffer
- * with a greeting that the host can use.
+ * with a log that the host can use.
  */
 #[no_mangle]
 pub extern "C" fn set_name(len: i32) -> i32 {
     let name = unsafe { std::str::from_utf8(&BUFFER[..len as usize]).unwrap() };
 
-    let greeting = format!("Module Log: {}", name);
+    let log = format!("Module Log: {}", name);
     // Rust has a number of ways to do this more efficiently...
     // done "long hand" to illustrate what's happening
     unsafe {
-        for (idx, byte) in greeting.as_bytes().iter().enumerate() {
+        for (idx, byte) in log.as_bytes().iter().enumerate() {
             BUFFER[idx] = *byte;
         }
     }
 
-    greeting.len() as i32
+    log.len() as i32
 }

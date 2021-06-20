@@ -1,5 +1,5 @@
 [package]
-name = "rust-wasm32-guest"
+name = "rust-guest"
 version = "0.1.0"
 authors = ["Tim Langford <tim.langford@gmail.com>"]
 edition = "2018"

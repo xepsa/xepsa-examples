@@ -4,12 +4,13 @@ use std::{error::Error, fs::File};
 use wasm3::Module;
 use wasm3::{Environment, Runtime};
 
+// Boxed Constructor
+//
 fn main() -> Result<(), Box<dyn Error>> {
     let env = Environment::new()?;
     let rt = env.create_runtime(1024 * 60)?;
-    let mut f = File::open(
-        "../rust-wasm32-guest/target/wasm32-unknown-unknown/debug/rust_wasm32_guest.wasm",
-    )?;
+    let mut f =
+        File::open("../rust-wasm32-guest/target/wasm32-unknown-unknown/debug/rust_guest.wasm")?;
     let mut bytes = vec![];
     f.read_to_end(&mut bytes)?;
     let module = Module::parse(&env, &bytes)?;
