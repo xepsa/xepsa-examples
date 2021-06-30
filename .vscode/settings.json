@@ -5,6 +5,7 @@
         "bindgen",
         "cdylib",
         "fname",
+        "postgres",
         "wapc",
         "wasm",
         "wasmer",
