@@ -5,9 +5,14 @@
         "bindgen",
         "cdylib",
         "fname",
+<<<<<<< HEAD
         "postgres",
+=======
+        "keyvalue",
+>>>>>>> Adding wasmcloud example.
         "wapc",
         "wasm",
+        "wasmcloud",
         "wasmer",
         "wasmerio",
         "wasmtime",
