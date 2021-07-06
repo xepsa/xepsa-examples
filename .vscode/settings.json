@@ -1,15 +1,20 @@
 {
     "cSpell.words": [
+        "Initialise",
         "WASI",
         "addto",
         "bindgen",
         "cdylib",
+        "chrono",
         "fname",
-<<<<<<< HEAD
         "postgres",
-=======
         "keyvalue",
->>>>>>> Adding wasmcloud example.
+        "initialised",
+        "mobc",
+        "postgres",
+        "serde",
+        "thiserror",
+        "todos",
         "wapc",
         "wasm",
         "wasmcloud",
