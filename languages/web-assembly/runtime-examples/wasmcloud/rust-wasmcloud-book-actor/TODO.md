@@ -1,6 +1,5 @@
 ## Book Library.
 
-In this lab you’ll utilize the techniques used for building actors in the preceding code samples. 
 
 Create a “booklibrary” actor (fun fact: calling your crate library can cause bizarre compilation failures) that exposes a CRUD (Create/Retrieve/Update/Delete) interface over an HTTP server (e.g. “RESTful”) on a library, allowing users to create new book entries, query existing books, update books, and delete books.
 
@@ -35,3 +34,4 @@ struct Book {
 You should be able to draw from the preceding code samples to help you build this lab. You can use the wash tool to start and configure your providers and the library actor. 
 
 For resources, you will want to look at the code/documentation for the key-value and HTTP server actor interfaces for wasmCloud.
+
