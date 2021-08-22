@@ -1,0 +1,26 @@
+[package]
+name = "process-management-rust"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc = "0.2"
+nix = "0.15.0"
+
+[[bin]]
+name = "child-wait"
+path = "src/child-wait.rs"
+
+[[bin]]
+name = "child-wait-busy-loop"
+path = "src/child-wait-busy-loop.rs"
+
+[[bin]]
+name = "child-wait-sig-handler"
+path = "src/child-wait-sig-handler.rs"
+
+[[bin]]
+name = "grandchild-wait-subrepear"
+path = "src/grandchild-wait-subrepear.rs"
