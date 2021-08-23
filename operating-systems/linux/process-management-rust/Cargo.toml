@@ -22,5 +22,13 @@ name = "child-wait-sig-handler"
 path = "src/child-wait-sig-handler.rs"
 
 [[bin]]
-name = "grandchild-wait-subrepear"
-path = "src/grandchild-wait-subrepear.rs"
+name = "grandchild-wait-subreaper"
+path = "src/grandchild-wait-subreaper.rs"
+
+[[bin]]
+name = "catch-parent-death-child"
+path = "src/catch-parent-death-child.rs"
+
+[[bin]]
+name = "catch-parent-death-parent"
+path = "src/catch-parent-death-parent.rs"

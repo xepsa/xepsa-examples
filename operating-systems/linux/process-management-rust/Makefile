@@ -10,6 +10,15 @@ child-wait-busy-loop:
 child-wait-sig-handler:
 	cargo run --bin child-wait-sig-handler
 
-.PHONY: grandchild-wait-subrepear
-grandchild-wait-subrepear:
-	cargo run --bin grandchild-wait-subrepear
+.PHONY: grandchild-wait-subreaper
+grandchild-wait-subreaper:
+	cargo run --bin grandchild-wait-subreaper
+
+.PHONY: catch-parent-death-child
+catch-parent-death-child:
+	cargo run --bin catch-parent-death-child
+
+.PHONY: catch-parent-death-parent
+catch-parent-death-parent:
+	cargo build --bin catch-parent-death-child
+	cargo run --bin catch-parent-death-parent
