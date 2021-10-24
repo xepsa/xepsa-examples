@@ -2,7 +2,7 @@
 
 ## Overview
 
-* Simple WAT `checkers` game model.
+* Simple WAST `checkers` game model.
 
 * Uses `mem` for the pieces and board state.
 
