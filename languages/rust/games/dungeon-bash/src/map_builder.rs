@@ -83,6 +83,7 @@ impl MapBuilder {
             let prev = rooms[i - 1].center();
             let new = room.center();
 
+            // 'dog-leg' corridor.
             if rng.range(0, 2) == 1 {
                 self.apply_horizontal_tunnel(prev.x, new.x, prev.y);
                 self.apply_vertical_tunnel(prev.y, new.y, new.x);
