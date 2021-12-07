@@ -15,3 +15,8 @@ pub struct Render {
 //
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Player;
+
+// Enemy
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Enemy;
