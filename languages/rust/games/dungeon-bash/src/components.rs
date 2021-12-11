@@ -34,6 +34,14 @@ pub struct WantsToMove {
     pub destination: Point,
 }
 
+// Wants to attack - A Message of Intent
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToAttack {
+    pub attacker: Entity,
+    pub victim: Entity,
+}
+
 // Health
 //
 #[derive(Clone, Copy, Debug, PartialEq)]
