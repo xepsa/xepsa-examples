@@ -25,3 +25,11 @@ pub struct Enemy;
 //
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RandomMove;
+
+// Wants to move - A Message of Intent
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToMove {
+    pub entity: Entity,
+    pub destination: Point,
+}
