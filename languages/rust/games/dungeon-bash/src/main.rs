@@ -67,13 +67,23 @@ impl State {
 //
 
 impl GameState for State {
+    // Initials
+    //
     fn tick(&mut self, ctx: &mut BTerm) {
+        // Clear the 'map' layer.
         ctx.set_active_console(0);
         ctx.cls();
+        // Clear the 'entity' layer.
         ctx.set_active_console(1);
         ctx.cls();
-        // Add keyboard state as a resource.
+        // Clear the 'HUD' layer.
+        ctx.set_active_console(2);
+        ctx.cls();
+        // Add 'keyboard state' as a resource.
         self.resources.insert(ctx.key);
+        // Add 'mouse state' as a resource. Set the active console to correct he correct scaling for the virtual terminal.
+        ctx.set_active_console(0);
+        self.resources.insert(Point::from_tuple(ctx.mouse_pos()));
         // Execute Systems
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
@@ -104,10 +114,13 @@ fn main() -> BError {
         .with_tile_dimensions(32, 32)
         .with_resource_path("resources/")
         .with_font("dungeonfont.png", 32, 32)
-        // Graphics Layer 01 - Base
+        .with_font("terminal8x8.png", 8, 8)
+        // Graphics Layer 01 - Base (Map)
         .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
-        // Graphics Layer 02 - Overlay
+        // Graphics Layer 02 - Overlay (Entities)
         .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
+        // Graphics Layer 03 - HUD
+        .with_simple_console_no_bg(SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, "terminal8x8.png")
         .build()?;
 
     main_loop(context, State::new())
