@@ -43,11 +43,10 @@ impl MapBuilder {
                 .unwrap()
                 .0,
         );
-        mb.amulet_start = mb.player_start.clone();
-        mb.amulet_start.x = mb.amulet_start.x + 1;
-        print!("Player Location: {:?}", mb.player_start);
-        print!("Amulet Location: {:?}", mb.amulet_start);
-
+        // mb.amulet_start = mb.player_start.clone();
+        // mb.amulet_start.x = mb.amulet_start.x + 1;
+        // print!("Player Location: {:?}", mb.player_start);
+        // print!("Amulet Location: {:?}", mb.amulet_start);
         mb
     }
 
