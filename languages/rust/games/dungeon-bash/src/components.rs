@@ -59,3 +59,13 @@ pub struct Name(pub String);
 //
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ChasePlayer;
+
+// Generic Item
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Item;
+
+// Amulet
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AmuletOfWotnot;

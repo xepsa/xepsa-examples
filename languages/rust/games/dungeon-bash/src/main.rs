@@ -44,6 +44,7 @@ impl State {
         let mut rng = RandomNumberGenerator::new();
         let map_builder = MapBuilder::new(&mut rng);
         spawn_player(&mut ecs, map_builder.player_start);
+        spawn_amulet_of_wotnot(&mut ecs, map_builder.amulet_start);
         map_builder
             .rooms
             .iter()
@@ -93,6 +94,7 @@ impl State {
             let mut rng = RandomNumberGenerator::new();
             let map_builder = MapBuilder::new(&mut rng);
             spawn_player(&mut self.ecs, map_builder.player_start);
+            spawn_amulet_of_wotnot(&mut self.ecs, map_builder.amulet_start);
             map_builder
                 .rooms
                 .iter()
