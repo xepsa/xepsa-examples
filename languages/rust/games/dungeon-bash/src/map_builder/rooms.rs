@@ -11,6 +11,7 @@ impl MapArchitect for RoomsArchitect {
             monster_spawns: Vec::new(),
             player_start: Point::zero(),
             amulet_start: Point::zero(),
+            theme: super::themes::DungeonTheme::new(),
         };
 
         mb.fill(TileType::Wall);
@@ -21,7 +22,6 @@ impl MapArchitect for RoomsArchitect {
         for room in mb.rooms.iter().skip(1) {
             mb.monster_spawns.push(room.center());
         }
-
         mb
     }
 }
