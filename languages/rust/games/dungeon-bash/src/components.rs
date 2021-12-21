@@ -97,3 +97,15 @@ impl FieldOfView {
         }
     }
 }
+
+// Health Potion
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ProvidesHealing {
+    pub amount: i32,
+}
+
+// Dungeon Map
+//
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ProvidesDungeonMap;
