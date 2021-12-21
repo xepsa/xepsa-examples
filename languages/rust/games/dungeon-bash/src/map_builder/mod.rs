@@ -4,9 +4,9 @@ mod empty;
 mod rooms;
 
 // use empty::EmptyArchitect;
-// use rooms::RoomsArchitect;
-// use automata::CellularAutomataArchitect;
+use automata::CellularAutomataArchitect;
 use drunkard::DrunkardsWalkArchitect;
+use rooms::RoomsArchitect;
 
 use crate::prelude::*;
 
@@ -30,52 +30,14 @@ pub struct MapBuilder {
 }
 
 impl MapBuilder {
-    // pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-    //     let mut mb = MapBuilder {
-    //         map: Map::new(),
-    //         rooms: Vec::new(),
-    //         monster_spawns: Vec::new(),
-    //         player_start: Point::zero(),
-    //         amulet_start: Point::zero(),
-    //     };
-    //     mb.fill(TileType::Wall);
-    //     mb.build_random_rooms(rng);
-    //     mb.build_corridors(rng);
-    //     mb.player_start = mb.rooms[0].center();
-    //
-    //     // Place the Amulet
-    //     //
-    //     let dijkstra_map = DijkstraMap::new(
-    //         SCREEN_WIDTH,
-    //         SCREEN_HEIGHT,
-    //         &vec![mb.map.point2d_to_index(mb.player_start)],
-    //         &mb.map,
-    //         1024.0,
-    //     );
-    //     const UNREACHABLE: &f32 = &f32::MAX;
-    //     mb.amulet_start = mb.map.index_to_point2d(
-    //         dijkstra_map
-    //             .map
-    //             .iter()
-    //             .enumerate()
-    //             .filter(|(_, dist)| *dist < UNREACHABLE)
-    //             .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-    //             .unwrap()
-    //             .0,
-    //     );
-    //     // mb.amulet_start = mb.player_start.clone();
-    //     // mb.amulet_start.x = mb.amulet_start.x + 1;
-    //     // print!("Player Location: {:?}", mb.player_start);
-    //     // print!("Amulet Location: {:?}", mb.amulet_start);
-    //     mb
-    // }
-
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        // let mut architect = EmptyArchitect {};
-        // let mut architect = RoomsArchitect {};
-        // let mut architect = CellularAutomataArchitect {};
-        let mut architect = DrunkardsWalkArchitect {};
-        architect.new(rng)
+        let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
+            0 => Box::new(DrunkardsWalkArchitect {}),
+            1 => Box::new(RoomsArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {}),
+        };
+        let mb = architect.new(rng);
+        mb
     }
 
     // Rooms
