@@ -1,57 +1,70 @@
+mod empty;
+
 use crate::prelude::*;
+use empty::EmptyArchitect;
 const NUM_ROOMS: usize = 20;
+
+// Map Architect --------------------------------------------------------------
+//
+
+trait MapArchitect {
+    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
+}
 
 // Map Builder ----------------------------------------------------------------
 //
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
+    pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
 }
 
 impl MapBuilder {
+    // pub fn new(rng: &mut RandomNumberGenerator) -> Self {
+    //     let mut mb = MapBuilder {
+    //         map: Map::new(),
+    //         rooms: Vec::new(),
+    //         monster_spawns: Vec::new(),
+    //         player_start: Point::zero(),
+    //         amulet_start: Point::zero(),
+    //     };
+    //     mb.fill(TileType::Wall);
+    //     mb.build_random_rooms(rng);
+    //     mb.build_corridors(rng);
+    //     mb.player_start = mb.rooms[0].center();
+    //
+    //     // Place the Amulet
+    //     //
+    //     let dijkstra_map = DijkstraMap::new(
+    //         SCREEN_WIDTH,
+    //         SCREEN_HEIGHT,
+    //         &vec![mb.map.point2d_to_index(mb.player_start)],
+    //         &mb.map,
+    //         1024.0,
+    //     );
+    //     const UNREACHABLE: &f32 = &f32::MAX;
+    //     mb.amulet_start = mb.map.index_to_point2d(
+    //         dijkstra_map
+    //             .map
+    //             .iter()
+    //             .enumerate()
+    //             .filter(|(_, dist)| *dist < UNREACHABLE)
+    //             .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+    //             .unwrap()
+    //             .0,
+    //     );
+    //     // mb.amulet_start = mb.player_start.clone();
+    //     // mb.amulet_start.x = mb.amulet_start.x + 1;
+    //     // print!("Player Location: {:?}", mb.player_start);
+    //     // print!("Amulet Location: {:?}", mb.amulet_start);
+    //     mb
+    // }
+
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        let mut mb = MapBuilder {
-            map: Map::new(),
-            rooms: Vec::new(),
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
-        };
-        mb.fill(TileType::Wall);
-        mb.build_random_rooms(rng);
-        mb.build_corridors(rng);
-        mb.player_start = mb.rooms[0].center();
-
-        // Place the Amulet
-        //
-        let dijkstra_map = DijkstraMap::new(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            &vec![mb.map.point2d_to_index(mb.player_start)],
-            &mb.map,
-            1024.0,
-        );
-        const UNREACHABLE: &f32 = &f32::MAX;
-        mb.amulet_start = mb.map.index_to_point2d(
-            dijkstra_map
-                .map
-                .iter()
-                .enumerate()
-                .filter(|(_, dist)| *dist < UNREACHABLE)
-                .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-                .unwrap()
-                .0,
-        );
-        // mb.amulet_start = mb.player_start.clone();
-        // mb.amulet_start.x = mb.amulet_start.x + 1;
-        // print!("Player Location: {:?}", mb.player_start);
-        // print!("Amulet Location: {:?}", mb.amulet_start);
-        mb
-    }
-
-    fn fill(&mut self, tile: TileType) {
-        self.map.tiles.iter_mut().for_each(|t| *t = tile);
+        let mut architect = EmptyArchitect {};
+        architect.new(rng)
     }
 
     // Rooms
@@ -119,5 +132,30 @@ impl MapBuilder {
                 self.apply_horizontal_tunnel(prev.x, new.x, new.y);
             }
         }
+    }
+
+    fn fill(&mut self, tile: TileType) {
+        self.map.tiles.iter_mut().for_each(|t| *t = tile);
+    }
+
+    fn find_most_distant(&self) -> Point {
+        let dijkstra_map = DijkstraMap::new(
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            &vec![self.map.point2d_to_index(self.player_start)],
+            &self.map,
+            1024.0,
+        );
+        const UNREACHABLE: &f32 = &f32::MAX;
+        self.map.index_to_point2d(
+            dijkstra_map
+                .map
+                .iter()
+                .enumerate()
+                .filter(|(_, dist)| *dist < UNREACHABLE)
+                .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+                .unwrap()
+                .0,
+        )
     }
 }
