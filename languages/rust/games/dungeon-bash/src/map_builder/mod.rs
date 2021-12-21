@@ -1,10 +1,12 @@
 mod automata;
+mod drunkard;
 mod empty;
 mod rooms;
 
 // use empty::EmptyArchitect;
 // use rooms::RoomsArchitect;
-use automata::CellularAutomataArchitect;
+// use automata::CellularAutomataArchitect;
+use drunkard::DrunkardsWalkArchitect;
 
 use crate::prelude::*;
 
@@ -71,7 +73,8 @@ impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
         // let mut architect = EmptyArchitect {};
         // let mut architect = RoomsArchitect {};
-        let mut architect = CellularAutomataArchitect {};
+        // let mut architect = CellularAutomataArchitect {};
+        let mut architect = DrunkardsWalkArchitect {};
         architect.new(rng)
     }
 
