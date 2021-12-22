@@ -73,7 +73,7 @@ pub fn player_input(
                 });
 
             if !hit_something {
-                took_action = true;
+                // took_action = true;
                 commands.push((
                     (),
                     WantsToMove {
