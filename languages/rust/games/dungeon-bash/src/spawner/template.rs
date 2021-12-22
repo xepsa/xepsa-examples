@@ -14,6 +14,7 @@ pub struct Template {
     pub glyph: char,
     pub provides: Option<Vec<(String, i32)>>,
     pub hp: Option<i32>,
+    pub base_damage: Option<i32>,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq)]
@@ -60,6 +61,7 @@ impl Templates {
     }
 
     fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer) {
+        // Build Entities.
         let entity = commands.push((
             pt.clone(),
             Render {
@@ -83,6 +85,10 @@ impl Templates {
                 );
             }
         }
+
+        // Handle Effects system
+        //
+        // if the entity 'provides' an effect, add the appropriate component via a 'command'.
         if let Some(effects) = &template.provides {
             effects
                 .iter()
@@ -93,6 +99,17 @@ impl Templates {
                         println!("Warning: we don't know how to provide {}", provides);
                     }
                 });
+        }
+
+        // Handle Damage system
+        //
+        // If template has 'damage component' add it to the entity via a `command`.
+        // If the entity is an 'item' add a 'weapon component' via a 'command'.
+        if let Some(damage) = &template.base_damage {
+            commands.add_component(entity, Damage(*damage));
+            if template.entity_type == EntityType::Item {
+                commands.add_component(entity, Weapon {});
+            }
         }
     }
 }
