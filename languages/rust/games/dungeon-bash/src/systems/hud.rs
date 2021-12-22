@@ -7,6 +7,8 @@ use crate::prelude::*;
 #[read_component(Carried)]
 #[read_component(Name)]
 pub fn hud(ecs: &SubWorld) {
+    // Player Heath
+    //
     let mut health_query = <&Health>::query().filter(component::<Player>());
     let player_health = health_query.iter(ecs).nth(0).unwrap();
 
@@ -29,10 +31,22 @@ pub fn hud(ecs: &SubWorld) {
         ColorPair::new(WHITE, RED),
     );
 
-    let player = <(Entity, &Player)>::query()
+    // Player Dungeon Level
+    //
+    let (player, map_level) = <(Entity, &Player)>::query()
         .iter(ecs)
-        .find_map(|(entity, _player)| Some(*entity))
+        .find_map(|(entity, player)| Some((*entity, player.map_level)))
         .unwrap();
+
+    draw_batch.print_color_right(
+        Point::new(SCREEN_WIDTH * 2, 1),
+        format!("Dungeon Level: {}", map_level + 1),
+        ColorPair::new(YELLOW, BLACK),
+    );
+
+    // Player Inventory
+    //
+
     let mut item_query = <(&Item, &Name, &Carried)>::query();
     let mut y = 3;
     item_query
