@@ -48,13 +48,9 @@ impl State {
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
 
-        print!("Player Tile: {:#?}", map_builder.player_start);
-        print!("Exit Tile: {:#?}", map_builder.amulet_start);
+        // print!("Player Tile: {:#?}", map_builder.player_start);
+        // print!("Exit Tile: {:#?}", map_builder.amulet_start);
 
-        // map_builder
-        //     .monster_spawns
-        //     .iter()
-        //     .for_each(|pos| spawn_entity(&mut ecs, &mut rng, *pos));
         spawn_level(&mut ecs, &mut rng, 0, &map_builder.monster_spawns);
 
         resources.insert(map_builder.map);
@@ -117,10 +113,6 @@ impl State {
             map_builder.map.tiles[exit_idx] = TileType::Exit;
         }
 
-        // map_builder
-        //     .monster_spawns
-        //     .iter()
-        //     .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, *pos));
         spawn_level(
             &mut self.ecs,
             &mut rng,
@@ -195,10 +187,6 @@ impl State {
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
 
-        // map_builder
-        //     .monster_spawns
-        //     .iter()
-        //     .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, *pos));
         spawn_level(&mut self.ecs, &mut rng, 0, &map_builder.monster_spawns);
 
         self.resources.insert(map_builder.map);

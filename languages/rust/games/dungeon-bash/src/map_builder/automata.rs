@@ -21,8 +21,8 @@ impl MapArchitect for CellularAutomataArchitect {
         mb.monster_spawns = mb.spawn_monsters(&start, rng);
         mb.player_start = start;
         mb.amulet_start = mb.find_most_distant();
-        mb.amulet_start.x = mb.player_start.x + 1;
-        mb.amulet_start.y = mb.player_start.y + 1;
+        // mb.amulet_start.x = mb.player_start.x + 1;
+        // mb.amulet_start.y = mb.player_start.y + 1;
         mb.theme = super::themes::DungeonTheme::new();
         mb
     }

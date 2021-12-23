@@ -19,8 +19,8 @@ impl MapArchitect for RoomsArchitect {
         mb.build_corridors(rng);
         mb.player_start = mb.rooms[0].center();
         mb.amulet_start = mb.find_most_distant();
-        mb.amulet_start.x = mb.player_start.x + 1;
-        mb.amulet_start.y = mb.player_start.y + 1;
+        // mb.amulet_start.x = mb.player_start.x + 1;
+        // mb.amulet_start.y = mb.player_start.y + 1;
         for room in mb.rooms.iter().skip(1) {
             mb.monster_spawns.push(room.center());
         }
