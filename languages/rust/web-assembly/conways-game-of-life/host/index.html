@@ -15,6 +15,10 @@
         align-items: center;
         justify-content: center;
       }
+      #fps {
+        white-space: pre;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
@@ -25,6 +29,7 @@
     -->
     <!-- Canvas Mode-->
     <button id="play-pause" ></button>
+    <div id="fps"></div>
     <canvas id="conways-game-of-life-canvas"></canvas>
     <!-- Bootstrap to asynchronously load WASM and other content-->
     <script src="./bootstrap.js"></script>
