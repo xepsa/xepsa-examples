@@ -1,0 +1,27 @@
+{
+  "name": "js-host-wasm-pack-template",
+  "version": "0.1.0",
+  "description": "Conway's Game of Life",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "start": "webpack-dev-server"
+  },
+  "keywords": [
+    "webassembly",
+    "wasm",
+    "rust",
+    "webpack"
+  ],
+  "author": "Tim Langford",
+  "license": "(MIT OR Apache-2.0)",
+  "devDependencies": {
+    "copy-webpack-plugin": "^10.2.0",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.1"
+  },
+  "dependencies": {
+    "js-host-wasm-pack-template": "file:../pkg"
+  }
+}
