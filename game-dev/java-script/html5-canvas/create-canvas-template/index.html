@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <style type="text/css">
+        canvas {
+            /* Ensure the canvas is not displayed 'inline'. */
+            display: block;
+            border: 1px solid black;
+            background-color: blue;
+        }
+        /* Remove browser defined margin to enable full canvas sizing. */
+        html, body {
+            /* Avoid issues with margins at the edge fo the screen. */
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            /* Remove 'scrollbars' */
+            overflow: hidden;
+        }
+    </style>
+    <title>Resizable HTML5 Canvas</title>
+</head>
+<body>
+    <canvas></canvas>
+    <script src="canvas.js"></script>
+</body>
+</html>
