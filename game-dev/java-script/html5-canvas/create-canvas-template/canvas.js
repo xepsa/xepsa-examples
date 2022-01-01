@@ -12,8 +12,6 @@ window.addEventListener('resize', resizeCanvas, false);
 var context = canvas.getContext('2d');
 
 function tick() {
-    // Better to do this
-    // resizeCanvas();
     requestAnimationFrame(tick);
 }
 tick();
