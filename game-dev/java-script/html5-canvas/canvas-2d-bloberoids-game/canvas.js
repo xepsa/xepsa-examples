@@ -32,6 +32,17 @@ function randomInRange(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+// Currently only supports Circles.
+// For circles: 'position' is center point, and 'offset' is radius.
+function isOffCanvas(position, offset) {
+    return (
+        position.x + offset < 0 ||
+        position.x - offset > canvas.width ||
+        position.y + offset < 0 ||
+        position.y - offset > canvas.height
+    );
+}
+
 // Player ---------------------------------------------------------------------
 //
 class Player {
@@ -145,14 +156,53 @@ const projectiles = [];
 const enemies = [];
 
 function tick() {
-    requestAnimationFrame(tick); // requestAnimationFrame - calls itself as quickly as possible.
+    // requestAnimationFrame - Calls itself as quickly as possible. 60 Hz ~ 17ms.
+    // Returns a monotonically increasing numerical id.
+    const frameId = requestAnimationFrame(tick);
+
+    // Clear Canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     player.update();
+
     projectiles.forEach((p) => {
         p.update();
     });
-    enemies.forEach((e) => {
+
+    enemies.forEach((e, eIdx) => {
         e.update();
+        // Check enemy/projectile collisions.
+        projectiles.forEach((p, pIdx) => {
+            const distance = Math.hypot(e.x - p.x, e.y - p.y);
+            if (distance - e.radius - p.radius < 1) {
+                // 'setTimeout' is used here to ensure the entities are removed
+                // before the next 'requestAnimationFrame` cycle and not during it.
+                setTimeout(() => {
+                    enemies.splice(eIdx, 1);
+                    projectiles.splice(pIdx, 1);
+                }, 0);
+            }
+            // Remove projectiles that have left the screen.
+            if (isOffCanvas(p, p.radius)) {
+                projectiles.splice(pIdx, 1);
+            }
+        });
+        // check for enemy/player collisions.
+        if (player) {
+            const distance = Math.hypot(e.x - player.x, e.y - player.y);
+            if (distance - e.radius - player.radius < 1) {
+                // 'setTimeout' is used here to ensure the entities are removed
+                // before the next 'requestAnimationFrame` cycle and not during it.
+                setTimeout(() => {
+                    enemies.splice(eIdx, 1);
+                    cancelAnimationFrame(frameId);
+                }, 0);
+            }
+        }
+        // Remove enemies that have left the screen.
+        if (isOffCanvas(e, e.radius)) {
+            enemies.splice(eIdx, 1);
+        }
     });
 }
 tick();
