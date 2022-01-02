@@ -1,6 +1,7 @@
 console.log('Loading canvas...');
 
 var canvas = document.querySelector('canvas');
+var scoreUI = document.querySelector('#score-ui');
 
 var resizeCanvas = () => {
     canvas.width = window.innerWidth;
@@ -197,6 +198,8 @@ const enemies = [];
 
 const particles = [];
 
+let score = 0;
+
 function tick() {
     // requestAnimationFrame - Calls itself as quickly as possible. 60 Hz ~ 17ms.
     // Returns a monotonically increasing numerical id.
@@ -218,6 +221,9 @@ function tick() {
         projectiles.forEach((p, pIdx) => {
             const distance = Math.hypot(e.x - p.x, e.y - p.y);
             if (distance - e.radius - p.radius < 1) {
+                // Update Score
+                score += 100;
+                scoreUI.innerHTML = score;
                 // Create Explosion
                 for (var i = 0; i < e.radius * 2; i++) {
                     const xFactor = Math.random() * 6;
@@ -243,6 +249,10 @@ function tick() {
                     // 'setTimeout' is used here to ensure the entities are removed
                     // before the next 'requestAnimationFrame` cycle and not during it.
                     setTimeout(() => {
+                        // Update Score - Bonus 100 for destroying large blobs.
+                        score += 100;
+                        scoreUI.innerHTML = score;
+                        // Remove entities from game state.
                         enemies.splice(eIdx, 1);
                         projectiles.splice(pIdx, 1);
                     }, 0);
