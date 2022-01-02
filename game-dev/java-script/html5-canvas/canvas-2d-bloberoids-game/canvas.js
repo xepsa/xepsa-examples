@@ -18,6 +18,12 @@ class Vec2D {
         this.x = x;
         this.y = y;
     }
+
+    mul(scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+        return this;
+    }
 }
 
 function raycast(source, destination) {
@@ -137,7 +143,7 @@ function spawnEnemies() {
 
     setInterval(() => {
         const radius = randomInRange(5, 30);
-        const color = 'green';
+        const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
         const center = new Vec2D(canvas.width / 2, canvas.height / 2);
         const origin = randomSpawnOrigin(radius);
         const velocity = raycast(origin, center);
@@ -149,7 +155,7 @@ spawnEnemies();
 
 // Game Loop ------------------------------------------------------------------
 
-const player = new Player(canvas.width / 2, canvas.height / 2, 20, 'blue');
+const player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
 
 const projectiles = [];
 
@@ -160,8 +166,9 @@ function tick() {
     // Returns a monotonically increasing numerical id.
     const frameId = requestAnimationFrame(tick);
 
-    // Clear Canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear Canvas. Set as black background with alpha opacity to give 'blur trail' effect.
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     player.update();
 
@@ -175,12 +182,20 @@ function tick() {
         projectiles.forEach((p, pIdx) => {
             const distance = Math.hypot(e.x - p.x, e.y - p.y);
             if (distance - e.radius - p.radius < 1) {
-                // 'setTimeout' is used here to ensure the entities are removed
-                // before the next 'requestAnimationFrame` cycle and not during it.
-                setTimeout(() => {
-                    enemies.splice(eIdx, 1);
-                    projectiles.splice(pIdx, 1);
-                }, 0);
+                if (e.radius - 10 > 10) {
+                    // Tween/Interpolate: e.radius -= 10;
+                    gsap.to(e, { radius: e.radius - 10 });
+                    setTimeout(() => {
+                        projectiles.splice(pIdx, 1);
+                    }, 0);
+                } else {
+                    // 'setTimeout' is used here to ensure the entities are removed
+                    // before the next 'requestAnimationFrame` cycle and not during it.
+                    setTimeout(() => {
+                        enemies.splice(eIdx, 1);
+                        projectiles.splice(pIdx, 1);
+                    }, 0);
+                }
             }
             // Remove projectiles that have left the screen.
             if (isOffCanvas(p, p.radius)) {
@@ -211,8 +226,7 @@ tick();
 //
 
 addEventListener('click', (e) => {
-    // Calculate velocity for projectile.
     const velocity = raycast(new Vec2D(canvas.width / 2, canvas.height / 2), new Vec2D(e.clientX, e.clientY));
-    const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 5, 'red', velocity);
+    const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity.mul(5));
     projectiles.push(projectile);
 });
