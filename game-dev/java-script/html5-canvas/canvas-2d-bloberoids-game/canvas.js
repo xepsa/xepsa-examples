@@ -153,6 +153,40 @@ function spawnEnemies() {
 }
 spawnEnemies();
 
+// Particle -------------------------------------------------------------------
+//
+
+const friction = 0.98;
+class Particle {
+    constructor(x, y, radius, color, velocity) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.alpha = 1;
+        this.velocity = velocity;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    update() {
+        this.draw();
+        this.velocity.x *= friction;
+        this.velocity.y *= friction;
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= 0.01;
+    }
+}
+
 // Game Loop ------------------------------------------------------------------
 
 const player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
@@ -160,6 +194,8 @@ const player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
 const projectiles = [];
 
 const enemies = [];
+
+const particles = [];
 
 function tick() {
     // requestAnimationFrame - Calls itself as quickly as possible. 60 Hz ~ 17ms.
@@ -182,6 +218,21 @@ function tick() {
         projectiles.forEach((p, pIdx) => {
             const distance = Math.hypot(e.x - p.x, e.y - p.y);
             if (distance - e.radius - p.radius < 1) {
+                // Create Explosion
+                for (var i = 0; i < e.radius * 2; i++) {
+                    const xFactor = Math.random() * 6;
+                    const yFactor = Math.random() * 6;
+                    particles.push(
+                        new Particle(
+                            p.x,
+                            p.y,
+                            Math.random() * 3,
+                            e.color,
+                            new Vec2D((Math.random() - 0.5) * xFactor, (Math.random() - 0.5) * yFactor)
+                        )
+                    );
+                }
+
                 if (e.radius - 10 > 10) {
                     // Tween/Interpolate: e.radius -= 10;
                     gsap.to(e, { radius: e.radius - 10 });
@@ -217,6 +268,16 @@ function tick() {
         // Remove enemies that have left the screen.
         if (isOffCanvas(e, e.radius)) {
             enemies.splice(eIdx, 1);
+        }
+    });
+
+    particles.forEach((p, pIdx) => {
+        if (p.alpha < 0) {
+            setTimeout(() => {
+                particles.splice(pIdx, 1);
+            }, 0);
+        } else {
+            p.update();
         }
     });
 }
