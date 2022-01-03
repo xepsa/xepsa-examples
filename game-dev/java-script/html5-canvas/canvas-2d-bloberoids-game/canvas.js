@@ -1,7 +1,6 @@
 console.log('Loading canvas...');
 
 var canvas = document.querySelector('canvas');
-var scoreUI = document.querySelector('#score-ui');
 
 var resizeCanvas = () => {
     canvas.width = window.innerWidth;
@@ -152,7 +151,6 @@ function spawnEnemies() {
         enemies.push(new Enemy(origin.x, origin.y, radius, color, velocity));
     }, 1000);
 }
-spawnEnemies();
 
 // Particle -------------------------------------------------------------------
 //
@@ -190,24 +188,42 @@ class Particle {
 
 // Game Loop ------------------------------------------------------------------
 
-const player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
+var player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
 
-const projectiles = [];
+var projectiles = [];
 
-const enemies = [];
+var enemies = [];
 
-const particles = [];
+var particles = [];
 
-let score = 0;
+var score = 0;
 
-function tick() {
-    // requestAnimationFrame - Calls itself as quickly as possible. 60 Hz ~ 17ms.
-    // Returns a monotonically increasing numerical id.
-    const frameId = requestAnimationFrame(tick);
-
+function clearCanvas() {
     // Clear Canvas. Set as black background with alpha opacity to give 'blur trail' effect.
     ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function initState() {
+    player = new Player(canvas.width / 2, canvas.height / 2, 10, 'white');
+    projectiles = [];
+    enemies = [];
+    particles = [];
+
+    score = 0;
+
+    // Init UI state
+    uiScore.innerHTML = score;
+    uiFinalScore.innerHTML = score;
+}
+
+function gameLoop() {
+    // requestAnimationFrame - Calls itself as quickly as possible. 60 Hz ~ 17ms.
+    // Returns a monotonically increasing numerical id.
+    const frameId = requestAnimationFrame(gameLoop);
+
+    // Clear Canvas. Set as black background with alpha opacity to give 'blur trail' effect.
+    clearCanvas();
 
     player.update();
 
@@ -223,7 +239,7 @@ function tick() {
             if (distance - e.radius - p.radius < 1) {
                 // Update Score
                 score += 100;
-                scoreUI.innerHTML = score;
+                uiScore.innerHTML = score;
                 // Create Explosion
                 for (var i = 0; i < e.radius * 2; i++) {
                     const xFactor = Math.random() * 6;
@@ -251,7 +267,7 @@ function tick() {
                     setTimeout(() => {
                         // Update Score - Bonus 100 for destroying large blobs.
                         score += 100;
-                        scoreUI.innerHTML = score;
+                        uiScore.innerHTML = score;
                         // Remove entities from game state.
                         enemies.splice(eIdx, 1);
                         projectiles.splice(pIdx, 1);
@@ -273,6 +289,9 @@ function tick() {
                     enemies.splice(eIdx, 1);
                     cancelAnimationFrame(frameId);
                 }, 0);
+                // GAME OVER! Display Modal - Allows game restart.
+                uiFinalScore.innerHTML = score;
+                uiStartModal.style.display = 'flex';
             }
         }
         // Remove enemies that have left the screen.
@@ -291,7 +310,6 @@ function tick() {
         }
     });
 }
-tick();
 
 // Event Listeners ------------------------------------------------------------
 //
@@ -300,4 +318,19 @@ addEventListener('click', (e) => {
     const velocity = raycast(new Vec2D(canvas.width / 2, canvas.height / 2), new Vec2D(e.clientX, e.clientY));
     const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity.mul(5));
     projectiles.push(projectile);
+});
+
+// UI -------------------------------------------------------------------------
+//
+
+var uiScore = document.querySelector('#ui-score');
+var uiStartModal = document.querySelector('#ui-start-modal');
+var uiFinalScore = document.querySelector('#ui-final-score');
+var uiStartButton = document.querySelector('#ui-start-btn');
+uiStartButton.addEventListener('click', (e) => {
+    uiStartModal.style.display = 'none';
+    initState();
+    clearCanvas();
+    spawnEnemies();
+    gameLoop();
 });
