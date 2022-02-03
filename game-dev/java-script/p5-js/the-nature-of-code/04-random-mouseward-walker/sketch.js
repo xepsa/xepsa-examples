@@ -1,74 +1,73 @@
-class Splat {
-    constructor(x, y, w, h, palette) {
+class Walker {
+    constructor(x, y, w, h) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-        this.splots = [];
-        for (let i = 0; i < 360; i++) {
-            let theta = (i * Math.PI) / 180;
-            let mag = floor(randomGaussian(0, 20));
-            this.splots.push({ x: this.x + Math.sin(theta) * mag, y: this.y + Math.cos(theta) * mag });
-        }
-
-        let mag = floor(randomGaussian(0, 20));
-
-        let r, g, b;
-        if (palette) {
-            // Gaussian color palette, assume one of RGB is not fixed.
-            r = palette?.r ? palette.r : Math.round(randomGaussian(0, 255));
-            g = palette?.g ? palette.g : Math.round(randomGaussian(0, 255));
-            b = palette?.b ? palette.b : Math.round(randomGaussian(0, 255));
-        } else {
-            r = Math.round(random(0, 255));
-            g = Math.round(random(0, 255));
-            b = Math.round(random(0, 255));
-        }
-        this.color = color(r, g, b);
     }
 
     // Interface
 
-    update = () => {};
+    update = () => {
+        this._step();
+    };
 
     draw = () => {
         ellipse(this.x, this.y, this.w, this.h);
-        for (let i = 0; i < this.splots.length; i++) {
-            stroke(this.color);
-            line(this.x, this.y, this.splots[i].x, this.splots[i].y);
+    };
+
+    // Methods
+
+    _step = () => {
+        if (isMousePressed && random(0, 1) > 0.75) {
+            if (mouseX > this.x) {
+                this.x += this.w / 4;
+            } else {
+                this.x -= this.w / 4;
+            }
+            if (mouseY > this.y) {
+                this.y += this.h / 4;
+            } else {
+                this.y -= this.h / 4;
+            }
+        } else {
+            this.x += random(-this.w / 4, this.w / 4);
+            this.y += random(-this.h / 4, this.h / 4);
         }
     };
 }
 
-const splats = [];
-const gaussianPalette = false;
-const palette = gaussianPalette ? { r: 128, g: 128 } : undefined;
-
+let isMousePressed = false;
 function mousePressed() {
-    const x = mouseX;
-    const y = mouseY;
-    const r = 5;
-    splats.push(new Splat(x, y, r, r, palette));
+    isMousePressed = true;
+}
+
+function mouseReleased() {
+    isMousePressed = false;
 }
 
 const BG_COLOR = 50;
 const CANVAS_W = 1000;
 const CANVAS_H = 500;
 
+let walker;
+const clear = false;
+
 function preload() {}
 
+let canvas;
 function setup() {
     createCanvas(CANVAS_W, CANVAS_H);
     background(BG_COLOR);
+    const pos = { x: width / 2, y: height / 2 };
+    const dim = { h: 20, w: 20 };
+    walker = new Walker(pos.x, pos.y, dim.w, dim.h);
 }
 
 function draw() {
     if (clear) {
         background(BG_COLOR);
     }
-
-    for (let i = 0; i < splats.length; i++) {
-        splats[i].update();
-        splats[i].draw();
-    }
+    walker.update();
+    walker.draw();
 }
