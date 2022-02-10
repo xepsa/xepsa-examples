@@ -19,8 +19,26 @@ class Walker {
     // Methods
 
     _step = () => {
-        this.x += (randomGaussian(0, 2) * this.w) / 4;
-        this.y += (randomGaussian(0, 2) * this.h) / 4;
+        this.x += (this._montecarlo() * this.w) / 4;
+        this.y += (this._montecarlo() * this.h) / 4;
+    };
+
+    _montecarlo = () => {
+        // We do this “forever” until we find a qualifying random value.
+        while (true) {
+            // Pick a random value.
+            let r1 = random(0, 1);
+            // Assign a probability.
+            let probability = Math.pow(1.0 - r1, 2);
+
+            // Pick a second random value.
+            let r2 = random(0, 1);
+
+            //[full] Does it qualify?  If so, we’re done!
+            if (r2 < probability) {
+                return random(0, 1) > 0.5 ? r1 : -r1;
+            }
+        }
     };
 }
 
