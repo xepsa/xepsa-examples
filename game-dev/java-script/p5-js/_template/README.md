@@ -1,6 +1,16 @@
 # README.md
 
-## Webserver
+I do something!
+
+---
+
+## References
+
+-   [p5js - Home](https://p5js.org/)
+
+---
+
+## How to run
 
 -   A webserver is required for development when using multiple source files.to
     circumvent CORS and other issues.
