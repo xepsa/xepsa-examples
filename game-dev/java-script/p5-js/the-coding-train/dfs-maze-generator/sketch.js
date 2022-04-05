@@ -24,20 +24,7 @@ class Cell {
         const py = this.row * cs;
 
         // Draw Cell
-        //
-        let color = this.visited ? VisitedCellColor : NotVisitedCellColor;
-        if (this.finished) {
-            color = FinishedCellColor;
-        }
-        if (this.isDeadEnd()) {
-            color = DeadEndCellColor;
-        }
-        if (this.current) {
-            color = CurrentCellColor;
-        }
-        if (this.start) {
-            color = StartCellColor;
-        }
+        const color = this._getCellColor();
         fill(color);
         noStroke();
         square(px, py, cs);
@@ -61,6 +48,23 @@ class Cell {
         if (this.walls[3]) {
             line(px, py + cs, px, py);
         }
+    };
+
+    _getCellColor = () => {
+        let color = this.visited ? props.cells.visited : props.cells.unvisited;
+        if (this.finished) {
+            color = props.cells.finished;
+        }
+        if (this.isDeadEnd()) {
+            color = props.cells.end;
+        }
+        if (this.current) {
+            color = props.cells.current;
+        }
+        if (this.start) {
+            color = props.cells.start;
+        }
+        return color;
     };
 }
 
@@ -117,12 +121,12 @@ class Grid {
     };
 
     hasUnvisitedNeighbours = (cell) => {
-        return this.countUnvisitedNeighbour() > 0;
+        return this.countUnvisitedNeighbour(cell) > 0;
     };
 
     getRandomUnvisitedNeighbour = (cell) => {
         let selected;
-        let unvisited = grid.getAllUnvisitedNeighbours(cell);
+        let unvisited = this.getAllUnvisitedNeighbours(cell);
         if (unvisited.length > 0) {
             selected = unvisited[Math.floor(random(0, unvisited.length))];
         }
@@ -130,11 +134,11 @@ class Grid {
     };
 
     tunnel = (fromCell, toCell) => {
-        this.removeWalls(fromCell, toCell);
-        this.move(fromCell, toCell);
+        this._removeWalls(fromCell, toCell);
+        this._move(fromCell, toCell);
     };
 
-    removeWalls = (fromCell, toCell) => {
+    _removeWalls = (fromCell, toCell) => {
         const colDiff = fromCell.col - toCell.col;
         const rowDiff = fromCell.row - toCell.row;
         if (colDiff > 0) {
@@ -159,7 +163,7 @@ class Grid {
         }
     };
 
-    move = (fromCell, toCell) => {
+    _move = (fromCell, toCell) => {
         fromCell.current = false;
         toCell.current = true;
         toCell.visited = true;
@@ -169,6 +173,40 @@ class Grid {
         this.cells.forEach((cell) => {
             cell.draw();
         });
+    };
+}
+
+class RandomizedDFSGenerator {
+    constructor(cols, rows, cellSize) {
+        // Create Grid
+        this.grid = new Grid(cols, rows, cellSize);
+        this.stack = [];
+        // Initialise
+        const currentCell = this.grid.getCell(Math.floor(cols / 2), Math.floor(rows / 2));
+        currentCell.start = true;
+        currentCell.visited = true;
+        this.stack.push(currentCell);
+    }
+
+    generateNext = () => {
+        if (this.stack.length > 0) {
+            const currentCell = this.stack.pop();
+            const nextCell = this.grid.getRandomUnvisitedNeighbour(currentCell);
+            if (nextCell) {
+                this.stack.push(currentCell);
+                this.grid.tunnel(currentCell, nextCell);
+                this.stack.push(nextCell);
+            } else {
+                currentCell.current = false;
+                currentCell.finished = true;
+            }
+        }
+    };
+
+    generateMaze = () => {
+        while (this.stack.length > 0) {
+            this.generateNext();
+        }
     };
 }
 
@@ -186,53 +224,84 @@ const CANVAS_PRIMARY = 0;
 
 function preload() {}
 
-let grid;
-let rows = 40;
-let cols = 40;
+// Clear Button.
+let clearButton;
+function clearMaze() {
+    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+}
+// Generate Button.
+let generateButton;
+function genMaze() {
+    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    if (!animate) {
+        generator.generateMaze();
+    }
+}
+// Animate Toggle.
+let animateToggle;
+let animate = false;
+function updateAnimate() {
+    animate = animateToggle.checked();
+}
+
+// let rows = 40;
+// let cols = 40;
+// let rows = 80;
+// let cols = 80;
+let rows = 100;
+let cols = 100;
 let cellSize = Math.floor(CANVAS_WIDTH / cols);
 
-const stack = [];
+const props = {};
+let generator;
 
-let CurrentCellColor;
-let StartCellColor;
-let VisitedCellColor;
-let NotVisitedCellColor = CANVAS_BACKGROUND;
-let FinishedCellColor;
-let DeadEndCellColor;
+// TODO
+// * Generation: static or animated. Done.
+// * Render - Static / Animated toggle
+// * Clear, New, Solve, Pause buttons.
+// * RGB Pallette
+// * Solvers
 
 function setup() {
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    CurrentCellColor = color('rgba(255, 0, 0, 0.75)');
+    // Clear Button.
+    clearButton = createButton('Clear');
+    clearButton.mousePressed(clearMaze);
+    // Generate Button.
+    generateButton = createButton('Generate');
+    generateButton.mousePressed(genMaze);
+    // Animate Toggle.
+    animateToggle = createCheckbox('animate', false);
+    animateToggle.changed(updateAnimate);
 
-    StartCellColor = color('rgba(0, 255, 0, 1)');
-    VisitedCellColor = color('rgba(0, 255, 0, 0.6)');
-    FinishedCellColor = color('rgba(0, 255, 0, 0.4)');
-    DeadEndCellColor = color('rgba(0, 255, 0, 0.2)');
+    // Pink Pallette
+    // const r = 255;
+    // const g = 128;
+    // const b = 255;
+    const r = 0;
+    const g = 256;
+    const b = 0;
+    const a = 1;
+    props.cells = {
+        unvisited: CANVAS_BACKGROUND,
+        current: color('rgba(255, 0, 0, 0.75)'),
+        start: color(`rgba(${r}, ${g}, ${b}, ${a})`),
+        visited: color(`rgba(${r}, ${g}, ${b}, ${a - 0.4})`),
+        finished: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
+        end: color(`rgba(${r}, ${g}, ${b}, ${a - 0.8})`),
+    };
 
-    grid = new Grid(cols, rows, cellSize);
-
-    const currentCell = grid.getCell(20, 20);
-    currentCell.start = true;
-    currentCell.visited = true;
-    stack.push(currentCell);
+    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    if (!animate) {
+        generator.generateMaze();
+    }
 }
 
 function draw() {
     background(CANVAS_BACKGROUND);
-
-    if (stack.length > 0) {
-        const currentCell = stack.pop();
-        const nextCell = grid.getRandomUnvisitedNeighbour(currentCell);
-        if (nextCell) {
-            stack.push(currentCell);
-            grid.tunnel(currentCell, nextCell);
-            stack.push(nextCell);
-        } else {
-            currentCell.current = false;
-            currentCell.finished = true;
-        }
+    if (animate) {
+        generator.generateNext();
     }
-
-    grid.draw();
+    generator.grid.draw();
 }
