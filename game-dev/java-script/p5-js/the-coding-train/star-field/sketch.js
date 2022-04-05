@@ -46,7 +46,7 @@ class Star {
         //
         //
         // 1a. Calculate the ratio of 'x' w.r.t 'z' to produce a value between [0..1].
-        // 1b. Calculate the ratio of 'x' w.r.t 'z' to produce a value between [0..1].
+        // 1b. Calculate the ratio of 'y' w.r.t 'z' to produce a value between [0..1].
         // 2a. Map this ratio to [0, viewport-width] for 'x'.
         // 2b. Map this ration to [0, viewport-height] for 'y'.
         const sx = map(this.x / this.z, 0, 1, 0, width);
