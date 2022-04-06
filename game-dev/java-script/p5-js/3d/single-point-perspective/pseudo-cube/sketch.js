@@ -47,7 +47,7 @@ class Cube {
     };
 
     render = () => {
-        // Projection - Calculate the 'projected' set of cube vertices/
+        // Projection - Calculate the 'projected' set of cube vertices.
         //
         const projected = this._calculateProjection();
 
