@@ -203,7 +203,7 @@ class RandomizedDFSGenerator {
         }
     };
 
-    generateMaze = () => {
+    generateAll = () => {
         while (this.stack.length > 0) {
             this.generateNext();
         }
@@ -222,38 +222,25 @@ const CANVAS_PRIMARY = 0;
 // p5 Instance ------------------------------------------------------------------------------------
 //
 
-function preload() {}
-
-// Clear Button.
-let clearButton;
-function clearMaze() {
-    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
-}
-// Generate Button.
-let generateButton;
-function genMaze() {
-    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
-    if (!animate) {
-        generator.generateMaze();
-    }
-}
-// Animate Toggle.
-let animateToggle;
-let animate = false;
-function updateAnimate() {
-    animate = animateToggle.checked();
-}
-
-// let rows = 40;
-// let cols = 40;
-// let rows = 80;
-// let cols = 80;
-let rows = 100;
-let cols = 100;
+let rows = 40;
+let cols = 40;
 let cellSize = Math.floor(CANVAS_WIDTH / cols);
 
-const props = {};
+let animate = false;
+
 let generator;
+const props = {};
+
+const clearMaze = () => {
+    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+};
+
+const generateMaze = () => {
+    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    if (!animate) {
+        generator.generateAll();
+    }
+};
 
 // TODO
 // * Generation: static or animated. Done.
@@ -263,17 +250,30 @@ let generator;
 // * Solvers
 
 function setup() {
-    createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    const canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+    canvas.parent('sketch-container');
 
-    // Clear Button.
-    clearButton = createButton('Clear');
-    clearButton.mousePressed(clearMaze);
-    // Generate Button.
-    generateButton = createButton('Generate');
-    generateButton.mousePressed(genMaze);
-    // Animate Toggle.
-    animateToggle = createCheckbox('animate', false);
-    animateToggle.changed(updateAnimate);
+    // Maze grid size controller.
+    const gridSizeSelect = document.getElementById('grid-size');
+    gridSizeSelect.onchange = () => {
+        const parts = gridSizeSelect.value.split('x');
+        cols = parts[0];
+        rows = parts[1];
+        cellSize = Math.floor(CANVAS_WIDTH / cols);
+        generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    };
+
+    // Maze generation animation controller.
+    const animateCheckbox = document.getElementById('animate-maze-gen');
+    animateCheckbox.onchange = () => {
+        animate = animateCheckbox.checked;
+    };
+
+    // Maze generator button.
+    const generateMazeBtn = document.getElementById('generate-maze-btn');
+    generateMazeBtn.onclick = () => {
+        generateMaze();
+    };
 
     // Pink Pallette
     // const r = 255;
@@ -294,7 +294,7 @@ function setup() {
 
     generator = new RandomizedDFSGenerator(cols, rows, cellSize);
     if (!animate) {
-        generator.generateMaze();
+        generator.generateAll();
     }
 }
 

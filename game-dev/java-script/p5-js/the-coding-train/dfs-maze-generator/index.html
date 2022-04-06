@@ -9,6 +9,48 @@
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
+
+    <div id="sketch-container"></div>
+
+    <div id="sketch-generate-controls" class="box">
+
+      <div>
+        <select id="grid-size" name="grid-sizes">
+            <option value="10x10">10 x 10</option>
+            <option value="20x20">20 x 20</option>
+            <option value="40x40" selected>40 x 40</option>
+            <option value="50x50">50 x 50</option>
+            <option value="80x80">80 x 80</option>
+            <option value="100x100">100 x 100</option>
+        </select>
+      </div>
+
+      <input type="color" id="maze-color" name="maze-color" value="#00ff00">
+
+      <div>
+        <label for="animate-maze-gen">Animate</label>
+        <input type="checkbox" id="animate-maze-gen" name="animate" value="false">
+      </div>
+
+      <button id="generate-maze-btn" class="favorite styled" type="button">
+        Generate
+      </button>
+
+    </div>
+
+    <div id="sketch-solve-controls" class="box">
+      <button class="favorite styled" type="button">
+        Solve
+      </button>
+      <div>
+        <label for="animate">Animate</label>
+        <input type="checkbox" id="animate" name="animate" value="false">
+      </div>
+      <div>
+        <label for="head">Colour</label>
+        <input type="color" id="sketch-color" name="sketch-color" value="#e66465">
+      </div>
+    </div>
     <script src="sketch.js"></script>
   </body>
 </html>
