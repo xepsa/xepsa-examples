@@ -1,10 +1,8 @@
-class Cell {
+class SquareTile {
+    initial = false;
     current = false;
     visited = false;
-    start = false;
     finished = false;
-    ingress = false;
-    egress = false;
 
     // TRBL - [Top, Right, Bottom, Left]
     walls = [true, true, true, true];
@@ -15,9 +13,23 @@ class Cell {
         this.size = size;
     }
 
+    resetSearchState = () => {
+        this.initial = false;
+        this.current = false;
+        this.visited = false;
+    };
+
     isDeadEnd = () => {
         const closed = this.walls.filter((wall) => wall);
         return closed.length === 3;
+    };
+
+    centroid = () => {
+        const cs = this.size;
+        const hcs = Math.floor(cs / 2);
+        const x = this.col * cs + hcs;
+        const y = this.row * cs + hcs;
+        return { x, y };
     };
 
     draw = () => {
@@ -25,13 +37,13 @@ class Cell {
         const px = this.col * cs;
         const py = this.row * cs;
 
-        // Draw Cell
-        const color = this._getCellColor();
+        // Draw SquareTile
+        const color = this._getTileColor();
         fill(color);
         noStroke();
         square(px, py, cs);
 
-        // Draw Cell Walls
+        // Draw SquareTile Walls
         //
         stroke(CANVAS_PRIMARY);
         // Top
@@ -52,71 +64,58 @@ class Cell {
         }
     };
 
-    _getCellColor = () => {
-        let color = this.visited ? props.cells.visited : props.cells.unvisited;
-        if (this.finished) {
-            color = props.cells.finished;
+    _getTileColor = () => {
+        let color = this.visited ? props.tiles.visited : props.tiles.unvisited;
+        if (this.initial) {
+            color = props.tiles.initial;
+        } else if (this.current) {
+            color = props.tiles.current;
+        } else if (this.finished) {
+            color = props.tiles.finished;
+        } else if (this.isDeadEnd()) {
+            color = props.tiles.deadend;
         }
-        if (this.isDeadEnd()) {
-            color = props.cells.end;
-        }
-        if (this.current) {
-            color = props.cells.current;
-        }
-        if (this.start) {
-            color = props.cells.start;
-        }
-        if (this.ingress) {
-            color = props.cells.ingress;
-        }
-        if (this.egress) {
-            color = props.cells.egress;
-        }
-        if (this.solution) {
-            color = 'yellow';
-        }
-
         return color;
     };
 }
 
-class Grid {
-    constructor(cols, rows, cellSize) {
+class SquareTileMaze {
+    constructor(cols, rows, tileSize) {
         this.cols = cols;
         this.rows = rows;
-        this.cellSize = cellSize;
-        this.cells = [];
+        this.tileSize = tileSize;
+        this.tiles = [];
         for (let j = 0; j < cols; j++) {
             for (let i = 0; i < rows; i++) {
-                this.cells.push(new Cell(i, j, cellSize));
+                this.tiles.push(new SquareTile(i, j, tileSize));
             }
         }
     }
 
-    getCellIndex = (x, y) => {
+    getTileIndex = (x, y) => {
         return y * this.rows + x;
     };
 
-    getCell = (x, y) => {
-        let cell;
+    getTile = (x, y) => {
+        let tile;
         // Edges - Do not wrap. Return undefined.
         if (x >= 0 && x < this.cols && y >= 0 && y < this.rows) {
-            const idx = this.getCellIndex(x, y);
-            cell = this.cells[idx];
+            const idx = this.getTileIndex(x, y);
+            tile = this.tiles[idx];
         }
-        return cell;
+        return tile;
     };
 
     findStart = () => {
-        return this.cells.filter((c) => c.ingress);
+        return this.tiles.filter((c) => c.start);
     };
 
-    getAllNeighbours = (cell) => {
+    getAllNeighbours = (tile) => {
         const neighbours = [];
-        const tc = this.getCell(cell.col, cell.row - 1);
-        const rc = this.getCell(cell.col + 1, cell.row);
-        const bc = this.getCell(cell.col, cell.row + 1);
-        const lc = this.getCell(cell.col - 1, cell.row);
+        const tc = this.getTile(tile.col, tile.row - 1);
+        const rc = this.getTile(tile.col + 1, tile.row);
+        const bc = this.getTile(tile.col, tile.row + 1);
+        const lc = this.getTile(tile.col - 1, tile.row);
         if (tc) {
             neighbours.push(tc);
         }
@@ -132,12 +131,12 @@ class Grid {
         return neighbours;
     };
 
-    getAllUnvisitedNeighbours = (cell) => {
+    getAllUnvisitedNeighbours = (tile) => {
         const unvisited = [];
-        const tc = this.getCell(cell.col, cell.row - 1);
-        const rc = this.getCell(cell.col + 1, cell.row);
-        const bc = this.getCell(cell.col, cell.row + 1);
-        const lc = this.getCell(cell.col - 1, cell.row);
+        const tc = this.getTile(tile.col, tile.row - 1);
+        const rc = this.getTile(tile.col + 1, tile.row);
+        const bc = this.getTile(tile.col, tile.row + 1);
+        const lc = this.getTile(tile.col - 1, tile.row);
         if (tc && !tc.visited) {
             unvisited.push(tc);
         }
@@ -153,124 +152,152 @@ class Grid {
         return unvisited;
     };
 
-    countUnvisitedNeighbours = (cell) => {
-        return this.getAllUnvisitedNeighbours(cell).length;
+    countUnvisitedNeighbours = (tile) => {
+        return this.getAllUnvisitedNeighbours(tile).length;
     };
 
-    hasUnvisitedNeighbours = (cell) => {
-        return this.countUnvisitedNeighbour(cell) > 0;
+    hasUnvisitedNeighbours = (tile) => {
+        return this.countUnvisitedNeighbour(tile) > 0;
     };
 
-    getRandomUnvisitedNeighbour = (cell) => {
+    getRandomUnvisitedNeighbour = (tile) => {
         let selected;
-        let unvisited = this.getAllUnvisitedNeighbours(cell);
+        let unvisited = this.getAllUnvisitedNeighbours(tile);
         if (unvisited.length > 0) {
             selected = unvisited[Math.floor(random(0, unvisited.length))];
         }
         return selected;
     };
 
-    move = (fromCell, toCell) => {
-        fromCell.current = false;
-        toCell.current = true;
-        toCell.visited = true;
+    move = (fromTile, toTile) => {
+        fromTile.current = false;
+        toTile.current = true;
+        toTile.visited = true;
     };
 
-    tunnel = (fromCell, toCell) => {
-        this._removeWalls(fromCell, toCell);
-        this.move(fromCell, toCell);
+    tunnel = (fromTile, toTile) => {
+        this._removeWalls(fromTile, toTile);
+        this.move(fromTile, toTile);
     };
 
-    addBegin = () => {
-        const begin = this.getCell(Math.floor(random(0, this.cols)), this.rows - 1);
-        begin.walls[2] = false;
-        begin.ingress = true;
-        return begin;
+    resetSearchState = () => {
+        this.tiles.forEach((tile) => tile.resetSearchState());
     };
 
-    addFinish = () => {
-        const finish = this.getCell(Math.floor(random(0, this.cols)), 0);
-        finish.walls[0] = false;
-        finish.egress = true;
-        return finish;
-    };
-
-    hasWall = (fromCell, toCell) => {
-        const colDiff = fromCell.col - toCell.col;
-        const rowDiff = fromCell.row - toCell.row;
+    hasWall = (fromTile, toTile) => {
+        const colDiff = fromTile.col - toTile.col;
+        const rowDiff = fromTile.row - toTile.row;
         if (colDiff > 0) {
             // RIGHT
-            return fromCell.walls[3] || toCell.walls[1];
+            return fromTile.walls[3] || toTile.walls[1];
         }
         if (colDiff < 0) {
             // LEFT
-            return fromCell.walls[1] || toCell.walls[3];
+            return fromTile.walls[1] || toTile.walls[3];
         }
         if (rowDiff > 0) {
             // TOP
-            return fromCell.walls[0] || toCell.walls[2];
+            return fromTile.walls[0] || toTile.walls[2];
         }
         if (rowDiff < 0) {
             // BOTTOM
-            return fromCell.walls[2] || toCell.walls[0];
+            return fromTile.walls[2] || toTile.walls[0];
         }
     };
 
-    _removeWalls = (fromCell, toCell) => {
-        const colDiff = fromCell.col - toCell.col;
-        const rowDiff = fromCell.row - toCell.row;
+    createOrigin = () => {
+        const origin = this.getTile(Math.floor(random(0, this.cols)), this.rows - 1);
+        origin.walls[2] = false;
+        origin.start = true;
+        return origin;
+    };
+
+    createGoal = () => {
+        const goal = this.getTile(Math.floor(random(0, this.cols)), 0);
+        goal.walls[0] = false;
+        goal.end = true;
+        return goal;
+    };
+
+    _removeWalls = (fromTile, toTile) => {
+        const colDiff = fromTile.col - toTile.col;
+        const rowDiff = fromTile.row - toTile.row;
         if (colDiff > 0) {
             // RIGHT
-            fromCell.walls[3] = false;
-            toCell.walls[1] = false;
+            fromTile.walls[3] = false;
+            toTile.walls[1] = false;
         }
         if (colDiff < 0) {
             // LEFT
-            fromCell.walls[1] = false;
-            toCell.walls[3] = false;
+            fromTile.walls[1] = false;
+            toTile.walls[3] = false;
         }
         if (rowDiff > 0) {
             // TOP
-            fromCell.walls[0] = false;
-            toCell.walls[2] = false;
+            fromTile.walls[0] = false;
+            toTile.walls[2] = false;
         }
         if (rowDiff < 0) {
             // BOTTOM.
-            fromCell.walls[2] = false;
-            toCell.walls[0] = false;
+            fromTile.walls[2] = false;
+            toTile.walls[0] = false;
         }
     };
 
     draw = () => {
-        this.cells.forEach((cell) => {
-            cell.draw();
+        this.tiles.forEach((tile) => {
+            tile.draw();
+            const { x, y } = tile.centroid();
+            if (tile.start) {
+                fill(props.tiles.start);
+                circle(x, y, tile.size / 2);
+            }
+            if (tile.end) {
+                fill(props.tiles.end);
+                circle(x, y, tile.size / 2);
+            }
         });
     };
 }
 
-class RandomizedDFSGenerator {
-    constructor(cols, rows, cellSize) {
-        // Create Grid
-        this.grid = new Grid(cols, rows, cellSize);
+// Randomized depth first Search based 'SquareTileMaze' generator.
+class SquareTileMazeGenerator {
+    constructor(cols, rows, tileSize) {
+        // Create SquareTileMaze
+        this.maze = new SquareTileMaze(cols, rows, tileSize);
         this.stack = [];
         // Initialise
-        const currentCell = this.grid.getCell(Math.floor(cols / 2), Math.floor(rows / 2));
-        currentCell.start = true;
-        currentCell.visited = true;
-        this.stack.push(currentCell);
+        const currentTile = this.maze.getTile(Math.floor(cols / 2), Math.floor(rows / 2));
+        currentTile.initial = true;
+        currentTile.visited = true;
+        this.stack.push(currentTile);
     }
+
+    clone = () => {
+        // Create a new fresh SquareTileMaze containing only the walls of a generated maze
+        // without any of the search state required to generate it.
+        this.generateAll();
+        const maze = new SquareTileMaze(cols, rows, tileSize);
+        for (let j = 0; j < this.maze.cols; j++) {
+            for (let i = 0; i < this.maze.rows; i++) {
+                const tile = this.maze.getTile(i, j);
+                maze.maze.getTile(i, j).walls = tile.walls;
+            }
+        }
+        return maze;
+    };
 
     generateNext = () => {
         if (this.stack.length > 0) {
-            const currentCell = this.stack.pop();
-            const nextCell = this.grid.getRandomUnvisitedNeighbour(currentCell);
-            if (nextCell) {
-                this.stack.push(currentCell);
-                this.grid.tunnel(currentCell, nextCell);
-                this.stack.push(nextCell);
+            const currentTile = this.stack.pop();
+            const nextTile = this.maze.getRandomUnvisitedNeighbour(currentTile);
+            if (nextTile) {
+                this.stack.push(currentTile);
+                this.maze.tunnel(currentTile, nextTile);
+                this.stack.push(nextTile);
             } else {
-                currentCell.current = false;
-                currentCell.finished = true;
+                currentTile.current = false;
+                currentTile.finished = true;
             }
         }
     };
@@ -286,69 +313,112 @@ class RandomizedDFSGenerator {
     };
 }
 
-class RandomizedDFSSolver {
-    constructor(grid) {
-        // Create Solver
-        // const maze = new Grid(grid.cols, grid.rows, grid.cellSize);
-        // this.grid = maze;
-        // this.begin = maze.addBegin();
-        // this.finish = maze.addFinish();
-        this.grid = grid;
-        this.begin = this.grid.addBegin();
-        this.finish = this.grid.addFinish();
+class SquareTileMazeSolution {
+    constructor(origin, goal, solution) {
+        this.solution = solution;
+    }
 
-        for (let j = 0; j < this.grid.cols; j++) {
-            for (let i = 0; i < this.grid.rows; i++) {
-                // this.cells.push(new Cell(i, j, cellSize));
-                const cell = this.grid.getCell(i, j);
-                cell.visited = false;
-                this.finished = false;
+    draw = () => {
+        if (this.solution) {
+            let previous;
+            this.solution.forEach((tile) => {
+                const { x: cx, y: cy } = tile.centroid();
+                if (previous) {
+                    const { x: px, y: py } = previous.centroid();
+                    stroke(props.solution.color);
+                    line(cx, cy, px, py);
+                }
+                previous = tile;
+            });
+            const origin = this.solution[0];
+            if (origin) {
+                const { x, y } = origin.centroid();
+                fill(props.tiles.start);
+                circle(x, y, origin.size / 2);
+            }
+            const goal = this.solution[this.solution.length - 1];
+            if (goal) {
+                const { x, y } = goal.centroid();
+                fill(props.tiles.end);
+                circle(x, y, goal.size / 2);
             }
         }
+    };
+}
+class RandomizedDFSSolver {
+    solution;
+
+    constructor(maze) {
+        // Create Solver
+        this.maze = maze;
+        this.maze.resetSearchState();
+        this.origin = this.maze.createOrigin();
+        this.goal = this.maze.createGoal();
+
+        // for (let j = 0; j < this.maze.cols; j++) {
+        //     for (let i = 0; i < this.maze.rows; i++) {
+        //         const tile = this.maze.getTile(i, j);
+        //         tile.visited = false;
+        //         this.goaled = false;
+        //     }
+        // }
 
         // Initialise
         this.stack = [];
-        this.begin.start = true;
-        this.begin.visited = true;
-        this.stack.push(this.begin);
+        this.origin.initial = true;
+        this.origin.visited = true;
+        this.stack.push(this.origin);
         this.solved = false;
     }
 
     solveNext = () => {
         if (this.stack.length > 0 && !this.solved) {
-            const currentCell = this.stack.pop();
+            const currentTile = this.stack.pop();
 
-            const neighbours = this.grid.getAllNeighbours(currentCell);
+            const neighbours = this.maze.getAllNeighbours(currentTile);
             const reachable = neighbours.filter((toNeighbour) => {
-                return !this.grid.hasWall(currentCell, toNeighbour);
+                return !this.maze.hasWall(currentTile, toNeighbour);
             });
             const unvisited = reachable.filter((candidate) => {
                 if (!candidate.visited) {
                     return candidate;
                 }
             });
-            // Could randomly select the next cell?
-            const nextCell = unvisited[0];
+            // Could randomly select the next tile?
+            const nextTile = unvisited[0];
 
-            if (nextCell) {
-                if (nextCell === this.finish) {
+            if (nextTile) {
+                if (nextTile === this.goal) {
+                    // Complete solution.
                     this.solved = true;
-                    this.stack.push(currentCell);
-                    this.stack.forEach((cell) => (cell.solution = true));
-                    // console.log('Finished! Solved the maze');
+                    this.stack.push(currentTile);
+                    this.stack.push(this.goal);
+                    // Store solution.
+                    this.solution = new SquareTileMazeSolution(this.origin, this.goal, this.stack);
+                    // Finalise search state.
+                    currentTile.current = false;
+                    currentTile.finished = true;
                 } else {
-                    this.stack.push(currentCell);
-                    this.grid.move(currentCell, nextCell);
-                    this.stack.push(nextCell);
+                    this.stack.push(currentTile);
+                    this.maze.move(currentTile, nextTile);
+                    this.stack.push(nextTile);
                 }
             } else {
-                // currentCell.current = false;
-                // currentCell.finished = true;
+                currentTile.current = false;
+                currentTile.finished = true;
             }
         }
     };
 
-    solveAll = () => {};
+    solveAll = () => {
+        while (!this.done()) {
+            this.generateNext();
+        }
+    };
+
+    done = () => {
+        return this.stack.length > 0 && this.solution;
+    };
 }
 
 // Canvas Configuration ---------------------------------------------------------------------------
@@ -369,7 +439,7 @@ let animate = false;
 // let cols = 40;
 let rows = 10;
 let cols = 10;
-let cellSize = Math.floor(CANVAS_WIDTH / cols);
+let tileSize = Math.floor(CANVAS_WIDTH / cols);
 
 let generator;
 let solver;
@@ -380,48 +450,46 @@ const createPalette = (hexCol) => {
     const g = parseInt(hexCol.slice(3, 5), 16);
     const b = parseInt(hexCol.slice(5), 16);
     const a = 1;
-    props.cells = {
+
+    props.tiles = {
         unvisited: CANVAS_BACKGROUND,
+        // initial: color(`rgba(${r}, ${g}, ${b}, ${a})`),
+        initial: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
         current: color('rgba(255, 0, 0, 0.75)'),
-        start: color(`rgba(${r}, ${g}, ${b}, ${a})`),
         visited: color(`rgba(${r}, ${g}, ${b}, ${a - 0.4})`),
         finished: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
-        end: color(`rgba(${r}, ${g}, ${b}, ${a - 0.8})`),
-        ingress: 'blue',
-        egress: 'red',
+        deadend: color(`rgba(${r}, ${g}, ${b}, ${a - 0.8})`),
+        start: 'blue',
+        end: 'red',
+    };
+    props.solution = {
+        color: 'yellow',
     };
 };
 
 const clearMaze = () => {
-    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
 };
 
 const generateMaze = () => {
-    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
     if (!animate) {
         generator.generateAll();
     }
 };
 
-// TODO
-// * Generation: static or animated. Done.
-// * Render - Static / Animated toggle
-// * Clear, New, Solve, Pause buttons.
-// * RGB Pallette
-// * Solvers
-
 function setup() {
     const canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     canvas.parent('sketch-container');
 
-    // Maze grid size controller.
-    const gridSizeSelect = document.getElementById('grid-size');
-    gridSizeSelect.onchange = (e) => {
+    // Maze maze size controller.
+    const mazeSizeSelect = document.getElementById('maze-size');
+    mazeSizeSelect.onchange = (e) => {
         const parts = e.target.value.split('x');
         cols = parts[0];
         rows = parts[1];
-        cellSize = Math.floor(CANVAS_WIDTH / cols);
-        generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+        tileSize = Math.floor(CANVAS_WIDTH / cols);
+        generator = new SquareTileMazeGenerator(cols, rows, tileSize);
         solver = null;
     };
 
@@ -447,7 +515,7 @@ function setup() {
     };
 
     // Maze Generator
-    generator = new RandomizedDFSGenerator(cols, rows, cellSize);
+    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
     if (!animate) {
         generator.generateAll();
     }
@@ -461,16 +529,19 @@ function draw() {
     if (animate) {
         generator.generateNext();
     }
-    generator.grid.draw();
+    generator.maze.draw();
 
     // Solve Maze
     //
     if (generator.done()) {
         if (!solver) {
-            solver = new RandomizedDFSSolver(generator.grid);
+            solver = new RandomizedDFSSolver(generator.maze);
         }
         if (animate) {
             solver.solveNext();
+        }
+        if (solver.solution) {
+            solver.solution.draw();
         }
     }
 }
