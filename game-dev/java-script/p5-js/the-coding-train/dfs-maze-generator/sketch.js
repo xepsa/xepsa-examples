@@ -65,15 +65,15 @@ class SquareTile {
     };
 
     _getTileColor = () => {
-        let color = this.visited ? props.tiles.visited : props.tiles.unvisited;
+        let color = this.visited ? props.maze.colors.visited : props.maze.colors.unvisited;
         if (this.initial) {
-            color = props.tiles.initial;
+            color = props.maze.colors.initial;
         } else if (this.current) {
-            color = props.tiles.current;
+            color = props.maze.colors.current;
         } else if (this.finished) {
-            color = props.tiles.finished;
+            color = props.maze.colors.finished;
         } else if (this.isDeadEnd()) {
-            color = props.tiles.deadend;
+            color = props.maze.colors.deadend;
         }
         return color;
     };
@@ -205,18 +205,37 @@ class SquareTileMaze {
         }
     };
 
-    createOrigin = () => {
-        const origin = this.getTile(Math.floor(random(0, this.cols)), this.rows - 1);
-        origin.walls[2] = false;
-        origin.start = true;
-        return origin;
+    createChallenge = (challengeType) => {
+        const origin = this.createChallengePoint(challengeType);
+        let goal = origin;
+        while (goal === origin) {
+            goal = this.createChallengePoint(challengeType);
+        }
+        return { origin, goal };
     };
 
-    createGoal = () => {
-        const goal = this.getTile(Math.floor(random(0, this.cols)), 0);
-        goal.walls[0] = false;
-        goal.end = true;
-        return goal;
+    createChallengePoint = (challengeType = 'edge') => {
+        let point;
+        if (challengeType === 'random') {
+            point = this.tiles[Math.floor(random(0, this.tiles.length - 1))];
+        } else {
+            const edge = Math.floor(random(0, 3));
+            switch (edge) {
+                case 0:
+                    point = this.getTile(Math.floor(random(0, this.cols)), 0);
+                    break;
+                case 1:
+                    point = this.getTile(this.cols - 1, Math.floor(random(0, this.rows)));
+                    break;
+                case 2:
+                    point = this.getTile(Math.floor(random(0, this.cols)), this.rows - 1);
+                    break;
+                case 3:
+                    point = this.getTile(0, Math.floor(random(0, this.rows)));
+                    break;
+            }
+        }
+        return point;
     };
 
     _removeWalls = (fromTile, toTile) => {
@@ -247,15 +266,6 @@ class SquareTileMaze {
     draw = () => {
         this.tiles.forEach((tile) => {
             tile.draw();
-            const { x, y } = tile.centroid();
-            if (tile.start) {
-                fill(props.tiles.start);
-                circle(x, y, tile.size / 2);
-            }
-            if (tile.end) {
-                fill(props.tiles.end);
-                circle(x, y, tile.size / 2);
-            }
         });
     };
 }
@@ -313,19 +323,34 @@ class SquareTileMazeGenerator {
     };
 }
 
-class SquareTileMazeSolution {
+class SquareTileMazeChallenge {
     constructor(origin, goal, solution) {
+        this.origin = origin;
+        this.goal = goal;
         this.solution = solution;
     }
 
     draw = () => {
+        // Draw Challenge.
+        if (this.origin) {
+            const { x, y } = this.origin.centroid();
+            fill(props.maze.colors.start);
+            circle(x, y, this.origin.size / 2);
+        }
+        if (this.goal) {
+            const { x, y } = this.goal.centroid();
+            fill(props.maze.colors.end);
+            circle(x, y, this.goal.size / 2);
+        }
+
+        // Draw Solution
         if (this.solution) {
             let previous;
             this.solution.forEach((tile) => {
                 const { x: cx, y: cy } = tile.centroid();
                 if (previous) {
                     const { x: px, y: py } = previous.centroid();
-                    stroke(props.solution.color);
+                    stroke(props.solution.colors.path);
                     line(cx, cy, px, py);
                 }
                 previous = tile;
@@ -333,41 +358,33 @@ class SquareTileMazeSolution {
             const origin = this.solution[0];
             if (origin) {
                 const { x, y } = origin.centroid();
-                fill(props.tiles.start);
+                fill(props.maze.colors.start);
                 circle(x, y, origin.size / 2);
             }
             const goal = this.solution[this.solution.length - 1];
             if (goal) {
                 const { x, y } = goal.centroid();
-                fill(props.tiles.end);
+                fill(props.maze.colors.end);
                 circle(x, y, goal.size / 2);
             }
         }
     };
 }
 class RandomizedDFSSolver {
-    solution;
-
     constructor(maze) {
         // Create Solver
         this.maze = maze;
         this.maze.resetSearchState();
-        this.origin = this.maze.createOrigin();
-        this.goal = this.maze.createGoal();
 
-        // for (let j = 0; j < this.maze.cols; j++) {
-        //     for (let i = 0; i < this.maze.rows; i++) {
-        //         const tile = this.maze.getTile(i, j);
-        //         tile.visited = false;
-        //         this.goaled = false;
-        //     }
-        // }
+        // Create Challenge
+        const { origin, goal } = this.maze.createChallenge(challengeType);
+        this.challenge = new SquareTileMazeChallenge(origin, goal, this.stack);
 
         // Initialise
         this.stack = [];
-        this.origin.initial = true;
-        this.origin.visited = true;
-        this.stack.push(this.origin);
+        origin.initial = true;
+        origin.visited = true;
+        this.stack.push(origin);
         this.solved = false;
     }
 
@@ -384,17 +401,18 @@ class RandomizedDFSSolver {
                     return candidate;
                 }
             });
+
             // Could randomly select the next tile?
             const nextTile = unvisited[0];
 
             if (nextTile) {
-                if (nextTile === this.goal) {
+                if (nextTile === this.challenge.goal) {
                     // Complete solution.
                     this.solved = true;
                     this.stack.push(currentTile);
-                    this.stack.push(this.goal);
+                    this.stack.push(this.challenge.goal);
                     // Store solution.
-                    this.solution = new SquareTileMazeSolution(this.origin, this.goal, this.stack);
+                    this.challenge.solution = this.stack;
                     // Finalise search state.
                     currentTile.current = false;
                     currentTile.finished = true;
@@ -412,12 +430,12 @@ class RandomizedDFSSolver {
 
     solveAll = () => {
         while (!this.done()) {
-            this.generateNext();
+            this.solveNext();
         }
     };
 
     done = () => {
-        return this.stack.length > 0 && this.solution;
+        return this.solved;
     };
 }
 
@@ -433,90 +451,28 @@ const CANVAS_PRIMARY = 0;
 // p5 Instance ------------------------------------------------------------------------------------
 //
 
-let animate = false;
-
-// let rows = 40;
-// let cols = 40;
 let rows = 10;
 let cols = 10;
 let tileSize = Math.floor(CANVAS_WIDTH / cols);
-
+let animateGenerator = false;
 let generator;
+
+let challengeType;
+let animateSolver = false;
 let solver;
+
 const props = {};
-
-const createPalette = (hexCol) => {
-    const r = parseInt(hexCol.slice(1, 3), 16);
-    const g = parseInt(hexCol.slice(3, 5), 16);
-    const b = parseInt(hexCol.slice(5), 16);
-    const a = 1;
-
-    props.tiles = {
-        unvisited: CANVAS_BACKGROUND,
-        // initial: color(`rgba(${r}, ${g}, ${b}, ${a})`),
-        initial: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
-        current: color('rgba(255, 0, 0, 0.75)'),
-        visited: color(`rgba(${r}, ${g}, ${b}, ${a - 0.4})`),
-        finished: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
-        deadend: color(`rgba(${r}, ${g}, ${b}, ${a - 0.8})`),
-        start: 'blue',
-        end: 'red',
-    };
-    props.solution = {
-        color: 'yellow',
-    };
-};
-
-const clearMaze = () => {
-    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
-};
-
-const generateMaze = () => {
-    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
-    if (!animate) {
-        generator.generateAll();
-    }
-};
 
 function setup() {
     const canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     canvas.parent('sketch-container');
 
-    // Maze maze size controller.
-    const mazeSizeSelect = document.getElementById('maze-size');
-    mazeSizeSelect.onchange = (e) => {
-        const parts = e.target.value.split('x');
-        cols = parts[0];
-        rows = parts[1];
-        tileSize = Math.floor(CANVAS_WIDTH / cols);
-        generator = new SquareTileMazeGenerator(cols, rows, tileSize);
-        solver = null;
-    };
-
-    // Maze colour controller.
-    const mazeColorSelect = document.getElementById('maze-color');
-    mazeColorSelect.onchange = (e) => {
-        const newHexCol = e.target.value;
-        createPalette(newHexCol);
-    };
-    createPalette(mazeColorSelect.value);
-
-    // Maze generation animation controller.
-    const animateCheckbox = document.getElementById('animate-maze-gen');
-    animateCheckbox.onchange = (e) => {
-        animate = e.target.checked;
-    };
-
-    // Maze generator button.
-    const generateMazeBtn = document.getElementById('generate-maze-btn');
-    generateMazeBtn.onclick = () => {
-        generateMaze();
-        solver = null;
-    };
+    generatorUI();
+    solverUI();
 
     // Maze Generator
     generator = new SquareTileMazeGenerator(cols, rows, tileSize);
-    if (!animate) {
+    if (!animateGenerator) {
         generator.generateAll();
     }
 }
@@ -526,7 +482,7 @@ function draw() {
 
     // Generate Maze
     //
-    if (animate) {
+    if (animateGenerator) {
         generator.generateNext();
     }
     generator.maze.draw();
@@ -537,11 +493,141 @@ function draw() {
         if (!solver) {
             solver = new RandomizedDFSSolver(generator.maze);
         }
-        if (animate) {
+        if (animateSolver) {
             solver.solveNext();
         }
-        if (solver.solution) {
-            solver.solution.draw();
+        if (solver.challenge) {
+            solver.challenge.draw();
         }
     }
 }
+
+//-------------------------------------------------------------------------------------------------
+// UI Components
+
+const createMazePalette = (hexCol) => {
+    const r = parseInt(hexCol.slice(1, 3), 16);
+    const g = parseInt(hexCol.slice(3, 5), 16);
+    const b = parseInt(hexCol.slice(5), 16);
+    const a = 1;
+
+    props.maze = {
+        colors: {
+            unvisited: CANVAS_BACKGROUND,
+            initial: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
+            current: color('rgba(255, 0, 0, 0.75)'),
+            visited: color(`rgba(${r}, ${g}, ${b}, ${a - 0.4})`),
+            finished: color(`rgba(${r}, ${g}, ${b}, ${a - 0.6})`),
+            deadend: color(`rgba(${r}, ${g}, ${b}, ${a - 0.8})`),
+            start: color(`rgba(0, 0, 255, ${a})`),
+            end: color(`rgba(255, 0, 20, ${a})`),
+        },
+    };
+};
+
+const clearMaze = () => {
+    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
+};
+
+const generateMaze = () => {
+    generator = new SquareTileMazeGenerator(cols, rows, tileSize);
+    if (!animateGenerator) {
+        generator.generateAll();
+    }
+};
+
+const generatorUI = () => {
+    // Maze maze size controller.
+    document.getElementById('maze-size').addEventListener('change', (e) => {
+        const parts = e.target.value.split('x');
+        cols = parts[0];
+        rows = parts[1];
+        tileSize = Math.floor(CANVAS_WIDTH / cols);
+        generator = new SquareTileMazeGenerator(cols, rows, tileSize);
+        solver = null;
+    });
+
+    // Maze colour controller.
+    const mazeColorSelect = document.getElementById('maze-color');
+    mazeColorSelect.addEventListener('change', (e) => {
+        const newHexCol = e.target.value;
+        createMazePalette(newHexCol);
+    });
+    createMazePalette(mazeColorSelect.value);
+
+    // Maze generation animation controller.
+    document.getElementById('animate-maze-gen').addEventListener('change', (e) => {
+        animateGenerator = e.target.checked;
+    });
+
+    // Maze generator button.
+    document.getElementById('generate-maze-btn').addEventListener('click', (e) => {
+        generateMaze();
+        solver = null;
+    });
+};
+
+//-------------------------------------------------------------------------
+
+const createSolutionPalette = (hexCol) => {
+    const r = parseInt(hexCol.slice(1, 3), 16);
+    const g = parseInt(hexCol.slice(3, 5), 16);
+    const b = parseInt(hexCol.slice(5), 16);
+    const a = 1;
+
+    props.solution = {
+        colors: {
+            path: color(`rgba(${r}, ${g}, ${b}, ${a})`),
+        },
+    };
+};
+
+const clearSolution = () => {
+    solution = null;
+};
+
+const generateSolution = () => {
+    if (!solver) {
+        solver = new RandomizedDFSSolver(generator.maze);
+    }
+    if (!animateSolver) {
+        solver.solveAll();
+    }
+};
+
+const solverUI = () => {
+    // Maze maze size controller.
+    document.getElementById('maze-challenge-types').addEventListener('change', (e) => {
+        if (solver) {
+            challengeType = e.target.value;
+            solver = new RandomizedDFSSolver(generator.maze);
+            solver.maze.createChallenge(challengeType);
+        }
+    });
+
+    // Maze colour controller.
+    const mazeSolveColorSelect = document.getElementById('solve-color');
+    mazeSolveColorSelect.addEventListener('change', (e) => {
+        const newHexCol = e.target.value;
+        createSolutionPalette(newHexCol);
+    });
+    createSolutionPalette(mazeSolveColorSelect.value);
+
+    // Maze solver animation controller.
+    document.getElementById('animate-maze-sol').addEventListener('change', (e) => {
+        animateSolver = e.target.checked;
+    });
+
+    // Maze solver button.
+    document.getElementById('solve-maze-btn').addEventListener('click', (e) => {
+        if (solver) {
+            generateSolution();
+        }
+    });
+};
+
+// TODO?
+//
+// 1. Add play, pause, fast-forward controls.
+// 2. Transition from one panel to another?
+// 3. Add tracing colours.

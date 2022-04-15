@@ -40,17 +40,27 @@
     </div>
 
     <div id="sketch-solve-controls" class="box">
-      <button class="favorite styled" type="button">
+
+      <div>
+        <select id="maze-challenge-types" name="maze-challenge-types">
+            <option value="edge" selected>Edges</option>
+            <option value="random">Random</option>
+        </select>
+      </div>
+
+      <div>
+        <input type="color" id="solve-color" name="sketch-color" value="#ffff00">
+      </div>
+
+      <div>
+        <label for="animate-maze-sol">Animate</label>
+        <input type="checkbox" id="animate-maze-sol" name="animate-maze-sol" value="false">
+      </div>
+
+      <button id="solve-maze-btn" class="favorite styled" type="button">
         Solve
       </button>
-      <div>
-        <label for="animate">Animate</label>
-        <input type="checkbox" id="animate" name="animate" value="false">
-      </div>
-      <div>
-        <label for="head">Colour</label>
-        <input type="color" id="sketch-color" name="sketch-color" value="#e66465">
-      </div>
+
     </div>
 
     <script src="sketch.js"></script>
