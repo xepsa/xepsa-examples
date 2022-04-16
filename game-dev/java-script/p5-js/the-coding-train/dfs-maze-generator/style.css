@@ -6,6 +6,8 @@
 
     --main-light-bg-color: var(--main-dark-fg-color);
     --main-light-fg-color: var(--main-dark-bg-color);
+
+    --selector-width: 4.5rem;
 }
 
 * {
@@ -17,7 +19,7 @@ body {
     margin: 0;
     padding: 0;
     margin-top: 1rem;
-    overflow: hidden;
+    /* overflow: scroll; */
     background-color: var(--main-color);
     display: flex;
     flex-direction: column;
@@ -26,6 +28,7 @@ body {
 
 canvas {
     display: block;
+
 }
 
 .box {
@@ -35,22 +38,24 @@ canvas {
     align-items: center;
 }
 
-#sketch-generate-controls {
+.control-widget {
     background-color: var(--main-dark-bg-color);
-    color: var(--main-light-bg-color);
+    color: var(--main-dark-fg-color);
     padding: 1rem;
     margin-top: 1rem;
     border-radius: 0.3rem;
-    width:100%;
+    width: 100%;
 }
 
-#sketch-solve-controls {
-    background-color: var(--main-dark-bg-color);
-    color: var(--main-light-bg-color);
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 0.3rem;
-    width:100%;
+
+.control-widget-element {
+    width: var(--selector-width);
+    background-color: inherit;
+    color: inherit;
+    border-radius: inherit;
+    border-style: solid;
+    border-color: var(--main-dark-fg-color);
 }
+
 
 

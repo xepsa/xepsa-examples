@@ -597,7 +597,7 @@ const generateSolution = () => {
 
 const solverUI = () => {
     // Maze maze size controller.
-    document.getElementById('maze-challenge-types').addEventListener('change', (e) => {
+    document.getElementById('maze-challenge-type').addEventListener('change', (e) => {
         if (solver) {
             challengeType = e.target.value;
             solver = new RandomizedDFSSolver(generator.maze);

@@ -12,52 +12,45 @@
 
     <div id="sketch-container"></div>
 
-    <div id="sketch-generate-controls" class="box">
+    <div id="sketch-generate-controls" class="box control-widget">
 
-      <div>
-        <select id="maze-size" name="maze-sizes">
-            <option value="10x10" selected>10 x 10</option>
-            <option value="20x20">20 x 20</option>
-            <option value="40x40">40 x 40</option>
-            <option value="50x50">50 x 50</option>
-            <option value="80x80">80 x 80</option>
-            <option value="100x100">100 x 100</option>
-        </select>
-      </div>
-
-      <input type="color" id="maze-color" name="maze-color" value="#00ff00">
-      <!-- <input type="color" id="maze-color" name="maze-color" value="#ff80ff"> -->
+      <select id="maze-size" name="maze-sizes" class="control-widget-element">
+          <option value="10x10" selected>10 x 10</option>
+          <option value="20x20">20 x 20</option>
+          <option value="40x40">40 x 40</option>
+          <option value="50x50">50 x 50</option>
+          <option value="80x80">80 x 80</option>
+          <option value="100x100">100 x 100</option>
+      </select>
+ 
+      <input type="color" id="maze-color" name="maze-color" value="#00ff00" class="control-widget-element">
 
       <div>
         <label for="animate-maze-gen">Animate</label>
         <input type="checkbox" id="animate-maze-gen" name="animate" value="false">
       </div>
 
-      <button id="generate-maze-btn" class="favorite styled" type="button">
+      <button type="button" id="generate-maze-btn" class="control-widget-element">
         Generate
       </button>
 
     </div>
 
-    <div id="sketch-solve-controls" class="box">
+    <div id="sketch-solve-controls" class="box control-widget">
 
-      <div>
-        <select id="maze-challenge-types" name="maze-challenge-types">
-            <option value="edge" selected>Edges</option>
-            <option value="random">Random</option>
-        </select>
-      </div>
+      <select id="maze-challenge-type" name="maze-challenge-type" class="control-widget-element">
+        <option value="edge" selected>Edges</option>
+        <option value="random">Random</option>
+      </select>
 
-      <div>
-        <input type="color" id="solve-color" name="sketch-color" value="#ffff00">
-      </div>
+      <input type="color" id="solve-color" name="solve-color" value="#ffff00" class="control-widget-element">
 
-      <div>
+      <span>
         <label for="animate-maze-sol">Animate</label>
         <input type="checkbox" id="animate-maze-sol" name="animate-maze-sol" value="false">
-      </div>
+      </span>
 
-      <button id="solve-maze-btn" class="favorite styled" type="button">
+      <button type="button" id="solve-maze-btn" class="control-widget-element">
         Solve
       </button>
 
