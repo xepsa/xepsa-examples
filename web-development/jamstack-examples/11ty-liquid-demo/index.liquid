@@ -1,0 +1,40 @@
+---
+layout: main
+title: Home Page
+---
+
+<h1>Wotcha!</h1>
+
+<p>
+    Welcome to a home page. 
+</p>
+
+<p>
+    Here is a list for fun:
+    <li>Cats</li>
+    <li>Dogs</li>
+    <li>Owls</li>
+</p>
+
+<p>
+    Here are some press releases:
+    <ul>
+        {% for pr in collections.press-release %}
+        <li><a href="{{ pr.url }}">{{ pr.data.title }}</a></li>
+        {% endfor %}
+    </ul>
+</p>
+
+<p>
+    Here is list of cat breeds:
+
+    <ul>
+    {% for breed in breeds %}
+    <li>{{ breed.name }} - {{ breed.description }}</li>
+    {% endfor %}
+    </ul>
+</p>
+
+<p>
+    You can contact me at {{ site.siteEmail }}
+</p>
